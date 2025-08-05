@@ -1,0 +1,5 @@
+# requirements for streamlit app
+pandas
+scikit-learn==1.7.0
+streamlit
+joblib 
