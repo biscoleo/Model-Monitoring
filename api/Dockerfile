@@ -1,11 +1,3 @@
-# copied over from previous assignemnt
-# needs adjustments!!!
-
-
-# PLACEHOLDER CODE
-
-
-
 
 # lightweight Python image as a parent image
 FROM python:3.9-slim
@@ -21,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application's code into the container at /app
 COPY . /app
+
+RUN mkdir /logs
 
 # Make port 8000 available for fastapi (this is the default fastapi/uvicorn port)
 EXPOSE 8000

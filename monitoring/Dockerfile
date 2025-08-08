@@ -1,10 +1,3 @@
-# copied over from previous assignemnt
-# needs adjustments!!!
-
-
-# PLACEHOLDER CODE
-
-
 # lightweight Python image as a parent image
 FROM python:3.9-slim
 
@@ -18,10 +11,10 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application's code into the container at /app
-COPY . /app
+COPY . .
 
-# Make port 8000 available for fastapi (this is the default fastapi/uvicorn port)
-EXPOSE 8000
+# Make port 8501 available for streamlit
+EXPOSE 8501
 
 # Define the command to run your app when the container starts
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0","--port", "8000"]
+CMD ["streamlit", "run", "dashboard_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,27 +1,25 @@
-# copied from previous assignment - placeholder
-
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import joblib
-import pandas as pd 
-from typing import Dict
-
+from pathlib import Path
+import json
+from datetime import datetime, UTC
 
 app = FastAPI()
 
-df = pd.read_csv('IMDB Dataset.csv')
+# LOGGING
+LOG_DIR = Path("/logs")
+LOG_FILE = LOG_DIR/ "prediction_logs.json"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-# if I use Field here and set min_length to 1, then i dont have to do manual if not input.text.strip() in my endpoint funcs becuase it will be caught here with pydantic!
+
+# Field and min_length at 1 allow me to use pydantic so I don't need to manually do if not input.text.strip() in my endpoint functions
 class TextInput(BaseModel):
     text: str = Field(..., min_length=1)
+    true_sentiment: str = Field(..., pattern="^(positive|negative)$")
 
 class SentimentResponse(BaseModel):
     sentiment: str
-
-class SentimentProbabilityResponse(BaseModel):
-    sentiment: str
-    probabilities: Dict[str, float]
 
 # load the model just once at startup
 try:
@@ -39,37 +37,21 @@ def read_root():
 def health_check():
     return{'status': 'ok'}
 
-
-
 @app.post('/predict', response_model=SentimentResponse)
 def predict_sentiment(input: TextInput):
     try:
         prediction = model.predict([input.text])[0]
+        # waht to store in log entry
+        log_entry = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "request_text": input.text,
+            "predicted_sentiment": prediction,
+            "true_sentiment": input.true_sentiment
+        }
+        # add it to the log file
+        with LOG_FILE.open("a") as f:
+            f.write(json.dumps(log_entry) + "\n")
+        # return the sentiment prediction
         return {'sentiment': prediction}
     except Exception as e:
         raise HTTPException(status_code = 500, detail=f'Prediction failed: {str(e)}')
-
-
-
-@app.post('/predict_proba', response_model=SentimentProbabilityResponse)
-def predict_with_probability(input: TextInput):
-    # prediction logic
-    try:
-        prediction = model.predict([input.text])[0]
-        probabilities = model.predict_proba([input.text])[0]
-        probability_dictionary = {
-            'negative': round(probabilities[0], 2),
-            'positive': round(probabilities[1], 2)
-        }
-
-        return {'sentiment': prediction, 
-                'probabilities': probability_dictionary}
-    except Exception as e:
-        raise HTTPException(status_code = 500, detail=f'Prediction failed: {str(e)}')
-
-
-@app.get('/example')
-def get_example():
-    random_row = df.sample(1).iloc[0]
-    return {'review': random_row['review']}
-
