@@ -28,10 +28,10 @@ The two services are run as separate Docker containers, sharing a volume to comm
 
 ### **FASTAPI SERVICE**
 
-| Method | Endpoint         | Description                                             |
-|--------|------------------|---------------------------------------------------------|
+| Method | Endpoint         | Description                                           |
+|--------|------------------|-------------------------------------------------------|
 | GET    | `/health`        | Returns `"status": "ok"` to verify the service is live |
-| POST   | `/predict`       | Accepts text and returns sentiment prediction          |
+| POST   | `/predict`       | Accepts text and returns sentiment prediction         |
 
 #### Example: POST /predict
 
